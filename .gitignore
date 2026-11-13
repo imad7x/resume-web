@@ -1,6 +1,8 @@
+# Resumes, history, trash and PDFs are private data, not code.
+/state/
+# The preview copy: a git worktree of branch "next" and its scratch data.
+/next/
+/next-state/
 __pycache__/
-*.env
-.env
-node_modules/
-.next/
-build/
+*.pyc
+/tests/out/

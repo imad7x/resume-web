@@ -2,6 +2,7 @@
  * skills as tags. */
 Resume.template({
   id: "timeline",
+  tags: ["simple"], ats: "high", example: "marketing",
   name: "Timeline",
   description: "Career along a line with dates on the left, skills as tags",
   width: 794,

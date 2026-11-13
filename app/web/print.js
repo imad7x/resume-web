@@ -57,7 +57,13 @@
     });
   });
 
-  if (q.get("id")) {
+  if (q.get("example")) {              // a made-up person, to look at a template: ?example=marketing&t=portrait
+    const s = document.createElement("script");
+    s.src = "data/examples.js";
+    s.onload = () => draw(window.Examples.get(q.get("example")), { template: q.get("t") || "charcoal", paper: q.get("paper") || "a4" },
+      q.get("pdf") ? "print" : "screen").catch((err) => { el.textContent = String(err.message || err); });
+    document.head.appendChild(s);
+  } else if (q.get("id")) {
     fetch("api/resumes/" + encodeURIComponent(q.get("id")))
       .then((r) => r.json())
       .then((doc) => {

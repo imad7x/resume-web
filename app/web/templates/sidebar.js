@@ -2,6 +2,7 @@
  * certifications; name, profile and experience on the right. */
 Resume.template({
   id: "sidebar",
+  tags: ["sidebar"], ats: "medium", example: "marketing",
   name: "Sidebar",
   description: "Coloured left column for contact and skills, roomy experience column",
   width: 794,

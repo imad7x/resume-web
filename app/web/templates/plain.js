@@ -2,6 +2,7 @@
  * layout applicant tracking systems read most reliably. */
 Resume.template({
   id: "plain",
+  tags: ["simple", "ats"], ats: "high", example: "engineer",
   name: "Plain",
   description: "One column, no frills; safest for job portals that parse resumes",
   width: 794,

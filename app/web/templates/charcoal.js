@@ -4,6 +4,7 @@
  * light grey column on the right. */
 Resume.template({
   id: "charcoal",
+  tags: ["columns"], ats: "medium", example: "engineer",
   name: "Charcoal",
   description: "Centred name on a dark band, contact, skills and education in a grey right column",
   order: 1,                   // first in the picker

@@ -1,39 +1,57 @@
-# Resume: a resume editor for everyone at home. One tab per person, any
-# number of copies each (one per kind of job), many templates, PDF download.
-# No logins.
+# 7xResume: the public resume builder at https://7xjobs.com/resume/build/ (owner, 2026-11-12). It replaced the
+# family Resume app (:8088), which was removed on 2026-11-12; its data is in /mnt/disk2/backups/resume.
 #
-#   on the LAN:  http://192.168.0.10:8088
-#   log:         docker logs resume
+# Resumes stay in each visitor's browser (IndexedDB). The server only hands out the page and prints a PDF from
+# a resume sent with the request, held in memory while Chromium reads it; nothing is written but a temp folder.
 #
-# Resumes, their earlier versions and deleted ones (trash) live in ./state as
-# JSON. A template is one file in app/web/templates; a new file there shows
-# up in the template picker on the next page load. PDFs are printed by the
-# Chromium inside the image.
+#   on the LAN:  http://192.168.0.10:8095/resume/build/   (through jobs-react, like the public site)
+#   log:         docker logs resume-public
+#   update:      edit on branch next (/docker/resume/next), merge into main, then
+#                docker compose build && docker compose up -d
+#
+# Locked down: the code is baked into the image (no mounts), the filesystem is read-only, no Linux capabilities,
+# and the only network is "resume-public", a private Docker network shared with jobs-react alone that has no way
+# out (internal), so neither the server nor its Chromium can reach the LAN or the internet.
 
 services:
-  resume:
+  resume-public:
     build: .
-    image: resume:latest
-    container_name: resume
+    image: 7xresume:latest
+    container_name: resume-public
     restart: unless-stopped
     user: "1000:1000"
-    ports:
-      - "8088:8088"
+    command: ["python", "/app/server.py"]
     environment:
       - TZ=Asia/Kolkata
-      # Names (besides IPs and localhost) the page may be opened under.
-      - ALLOWED_HOSTS=
+      - PORT=18089
+      - PUBLIC=1
+      - BASE_PATH=/resume/build
+      - ALLOWED_HOSTS=7xjobs.com,www.7xjobs.com,resume-public
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
-    volumes:
-      - ./state:/state
-      # The code is mounted read-only so an edit takes effect on the next
-      # restart (templates and the page: on the next reload), like plants.
-      - ./app:/app:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cpus: 1
+    mem_limit: 768m
+    pids_limit: 256
     # Chromium needs more shared memory than Docker's 64 MB default.
     shm_size: 256m
+    networks: [resume-public]
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8088/api/ping', timeout=3)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18089/resume/build/api/ping', timeout=3)"]
       interval: 60s
       timeout: 5s
       retries: 3
+
+networks:
+  resume-public:
+    name: resume-public
+    internal: true
+    driver_opts:
+      # No address for the host on this network either: the containers here can't reach the host's own
+      # services (SSH, the lab portal), only each other.
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+      com.docker.network.bridge.gateway_mode_ipv6: isolated

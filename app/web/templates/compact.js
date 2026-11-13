@@ -1,6 +1,7 @@
 /* Compact: dense type and tight spacing, for a long career on fewer pages. */
 Resume.template({
   id: "compact",
+  tags: ["simple"], ats: "high", example: "engineer",
   name: "Compact",
   description: "Dense and tidy; fits a long career on fewer pages",
   width: 794,

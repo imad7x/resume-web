@@ -1,6 +1,7 @@
 /* Executive: serif type, centred name, small-caps headings between rules. */
 Resume.template({
   id: "executive",
+  tags: ["simple"], ats: "high", example: "creative",
   name: "Executive",
   description: "Serif, centred heading, classic and formal",
   width: 794,

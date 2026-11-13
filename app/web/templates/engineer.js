@@ -2,6 +2,7 @@
  * skills table - for technical roles. */
 Resume.template({
   id: "engineer",
+  tags: ["simple"], ats: "high", example: "engineer",
   name: "Engineer",
   description: "Monospace accents and a skills table; suits technical roles",
   width: 794,

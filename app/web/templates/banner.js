@@ -2,6 +2,7 @@
  * beside a narrow column of skill tags, education and certifications. */
 Resume.template({
   id: "banner",
+  tags: ["simple"], ats: "high", example: "engineer",
   name: "Banner",
   description: "Bold colour band on top, skill tags in a side column",
   width: 794,
