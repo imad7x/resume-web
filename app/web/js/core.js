@@ -127,6 +127,7 @@
     { type: "button", on: { click: onclick }, attrs: { title, "aria-label": title } }, icon(ico));
   /* The way to 7xjobs.com, the owner's job site: one quiet link at the end of every top bar. */
   const jobsLink = () => el("a.jobs-link", { href: RS.PUBLIC ? "/" : "https://7xjobs.com/", target: RS.PUBLIC ? null : "_blank", rel: "noopener",
+    on: { click: () => RS.count("rjobs") },
     attrs: { title: "7xjobs: jobs in India, straight from the company (opens in a new tab)", "aria-label": "Find jobs on 7xjobs (opens in a new tab)" } },
     el("span.jl-i", {}, icon("briefcase")),
     el("span.jl-long", {}, "Find jobs on ", el("b", { text: "7xjobs" })),

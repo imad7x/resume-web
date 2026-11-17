@@ -9,7 +9,27 @@
   const RS = window.RS = window.RS || {};
   const PUBLIC = document.documentElement.dataset.public === "1";
   RS.PUBLIC = PUBLIC;
+  RS.count = () => {};
   if (!PUBLIC) return;
+
+  /* 2026-11-17: anonymous steps for the owner's visitors page (7xjobs lib/ping.ts and api.event; same rules): the
+   * builder opened, a resume made or changed (once per visit), a PDF made, and back to the jobs. No ID, no cookie and
+   * nothing from the resume; ?nocount=1 on 7xjobs (same site) turns it off on this device, as do test browsers. */
+  const counted = new Set();
+  RS.count = (a, s) => {
+    try {
+      if ((a === "ropen" || a === "redit") && counted.has(a)) return;
+      counted.add(a);
+      if (navigator.webdriver || localStorage.getItem("nobs:nocount")) return;
+      const now = Math.floor(Date.now() / 1000), seen = Number(localStorage.getItem("nobs:first")) || 0;
+      if (!seen) localStorage.setItem("nobs:first", String(now));
+      const p = new URLSearchParams({ a, p: location.pathname, ret: seen && now - seen > 1800 ? "1" : "0",
+        ph: matchMedia("(max-width: 719px)").matches ? "1" : "0" });
+      if (s) p.set("s", s);
+      fetch("/api/v1/e?" + p, { keepalive: true, cache: "no-store" }).catch(() => {});
+    } catch (e) { /* private mode: no count */ }
+  };
+  RS.count("ropen");
 
   const ME = { id: "me", name: "" };
   const HISTORY_GAP = 10 * 60 * 1000, HISTORY_KEEP = 30;
@@ -97,6 +117,7 @@
       const target = body.target || (source || {}).target;
       if (target) doc.target = copy(target);
       await put("resumes", doc.id, doc);
+      RS.count("redit");
       return doc;
     }
     if ((m = /^resumes\/([a-z0-9]+)\/history(?:\/(\d{8}-\d{6}))?$/.exec(path))) {
@@ -145,6 +166,7 @@
       changed.rev = doc.rev + 1;
       changed.updated = now();
       await put("resumes", doc.id, changed);
+      RS.count("redit");
       return { rev: changed.rev, updated: changed.updated };
     }
     fail(404, "not available in the online builder");
@@ -155,6 +177,7 @@
     const res = await fetch("api/pdf", { method: "POST", headers: { "X-Resume": "1", "Content-Type": "application/json" },
       body: JSON.stringify({ title: doc.title, design: doc.design, resume: doc.resume }) });
     if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "could not print");
+    RS.count("rpdf", win ? "view" : "download");
     const blob = await res.blob();
     const name = /filename\*=UTF-8''([^;]+)/.exec(res.headers.get("Content-Disposition") || "");
     const url = URL.createObjectURL(blob);
